@@ -58,6 +58,8 @@ void SokolCGenerator::gen_epilog(const GenInput& gen) {
 void SokolCGenerator::gen_prerequisites(const GenInput& gen) {
     if (gen.args.reflection) {
         l("#include <string.h>\n");
+        l("#include <utility>\n");
+        l("#include <span>\n");
     }
     l("#if !defined(SOKOL_GFX_INCLUDED)\n");
     l("#error \"Please include sokol_gfx.h before {}\"\n", pystring::os::path::basename(gen.args.output));
@@ -457,6 +459,17 @@ void SokolCGenerator::gen_attr_slot_refl_func(const GenInput& gen, const Program
     }
     l("return -1;\n");
     l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_attr_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const StageAttr& attr: prog.vs().inputs) {
+        if (attr.slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", attr.name, attr.slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
+    l_close("}}\n");
 }
 
 void SokolCGenerator::gen_texture_slot_refl_func(const GenInput& gen, const ProgramReflection& prog) {
@@ -470,6 +483,17 @@ void SokolCGenerator::gen_texture_slot_refl_func(const GenInput& gen, const Prog
         }
     }
     l("return -1;\n");
+    l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_texture_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const Texture& tex: prog.bindings.textures) {
+        if (tex.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", tex.name, tex.sokol_slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
     l_close("}}\n");
 }
 
@@ -485,6 +509,17 @@ void SokolCGenerator::gen_sampler_slot_refl_func(const GenInput& gen, const Prog
     }
     l("return -1;\n");
     l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_sampler_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const Sampler& smp: prog.bindings.samplers) {
+        if (smp.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", smp.name, smp.sokol_slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
+    l_close("}}\n");
 }
 
 void SokolCGenerator::gen_uniform_block_slot_refl_func(const GenInput& gen, const ProgramReflection& prog) {
@@ -498,6 +533,17 @@ void SokolCGenerator::gen_uniform_block_slot_refl_func(const GenInput& gen, cons
         }
     }
     l("return -1;\n");
+    l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_uniformblock_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const UniformBlock& ub: prog.bindings.uniform_blocks) {
+        if (ub.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", ub.name, ub.sokol_slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
     l_close("}}\n");
 }
 
@@ -513,6 +559,17 @@ void SokolCGenerator::gen_uniform_block_size_refl_func(const GenInput& gen, cons
     }
     l("return 0;\n");
     l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, size_t>> {}{}_enum_uniformblock_size() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, size_t>>({{\n");
+    for (const UniformBlock& ub: prog.bindings.uniform_blocks) {
+        if (ub.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",sizeof({})),\n", ub.name, struct_name(ub.name));
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
+    l_close("}}\n");
 }
 
 void SokolCGenerator::gen_storage_buffer_slot_refl_func(const GenInput& gen, const ProgramReflection& prog) {
@@ -527,6 +584,17 @@ void SokolCGenerator::gen_storage_buffer_slot_refl_func(const GenInput& gen, con
     }
     l("return -1;\n");
     l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_storagebuffer_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const StorageBuffer& sbuf: prog.bindings.storage_buffers) {
+        if (sbuf.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", sbuf.name, sbuf.sokol_slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
+    l_close("}}\n");
 }
 
 void SokolCGenerator::gen_storage_image_slot_refl_func(const GenInput& gen, const ProgramReflection& prog) {
@@ -540,6 +608,17 @@ void SokolCGenerator::gen_storage_image_slot_refl_func(const GenInput& gen, cons
         }
     }
     l("return -1;\n");
+    l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_storageimage_slot() {{\n", func_prefix, mod_prefix, prog.name);
+    l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+    for (const StorageImage& simg: prog.bindings.storage_images) {
+        if (simg.sokol_slot >= 0) {
+            l("std::make_pair(\"{}\",{}),\n", simg.name, simg.sokol_slot);
+        }
+    }
+    l_close("}});\n");
+    l("return data;\n");
     l_close("}}\n");
 }
 
@@ -558,6 +637,23 @@ void SokolCGenerator::gen_uniform_offset_refl_func(const GenInput& gen, const Pr
         }
     }
     l("return -1;\n");
+    l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, int>> {}{}_enum_uniform_offset(const char* ub_name) {{\n", func_prefix, mod_prefix, prog.name);
+    l("(void)ub_name;\n");
+    for (const UniformBlock& ub: prog.bindings.uniform_blocks) {
+        if (ub.sokol_slot >= 0) {
+            l_open("if (0 == strcmp(ub_name, \"{}\")) {{\n", ub.name);
+            l_open("static auto data = std::vector<std::pair<const char*, int>>({{\n");
+            for (const Type& u: ub.struct_info.struct_items) {
+                l("std::make_pair(\"{}\",{}),\n", u.name, u.offset);
+            }
+            l_close("}});\n");
+            l("return data;\n");
+            l_close("}}\n");
+        }
+    }
+    l("return {{}};\n");
     l_close("}}\n");
 }
 
@@ -584,6 +680,27 @@ void SokolCGenerator::gen_uniform_desc_refl_func(const GenInput& gen, const Prog
         }
     }
     l("return res;\n");
+    l_close("}}\n");
+
+    l_open("{}std::span<std::pair<const char*, sg_glsl_shader_uniform>> {}{}_enum_uniform_desc(const char* ub_name) {{\n", func_prefix, mod_prefix, prog.name);
+    l("(void)ub_name;\n");
+    for (const UniformBlock& ub: prog.bindings.uniform_blocks) {
+        if (ub.sokol_slot >= 0) {
+            l_open("if (0 == strcmp(ub_name, \"{}\")) {{\n", ub.name);
+            l_open("static auto data = std::vector<std::pair<const char*, sg_glsl_shader_uniform>>({{\n");
+            for (const Type& u: ub.struct_info.struct_items) {
+                l_open("std::make_pair(\"{}\", sg_glsl_shader_uniform{{\n", u.name);
+                l(".type = {},\n", uniform_type(u.type));
+                l(".array_count = {},\n", u.array_count);
+                l(".glsl_name = \"{}\",\n", u.name);
+                l_close("}}),\n");
+            }
+            l_close("}});\n");
+            l("return data;\n");
+            l_close("}}\n");
+        }
+    }
+    l("return {{}};\n");
     l_close("}}\n");
 }
 
